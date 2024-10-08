@@ -1,0 +1,95 @@
+import axios from "axios"
+import { API_BASE_URL } from "../../config/api"
+import { type } from "@testing-library/user-event/dist/type";
+import { GET_USER_PROFILE_FAILURE, GET_USER_PROFILE_SUCCESS, LOGIN_GOOGLE_FAILURE, LOGIN_GOOGLE_SUCCESS, LOGIN_USER_FAILURE, LOGIN_USER_SUCCESS, LOGOUT, REGISTER_USER_FAILURE, REGISTER_USER_SUCCESS } from "./ActionType";
+
+export const loginUser = (loginData) => async(dispatch) =>{
+    try{
+        console.log("data login: " , loginData)
+        const {data} = await axios.post(`${API_BASE_URL}/auth/login`, loginData)
+        console.log("logedin user ",data)
+        if(data.jwt){
+            localStorage.setItem("jwt", data.jwt);
+        }
+
+        dispatch({ type: LOGIN_USER_SUCCESS, payload: data.jwt });
+    }catch(error){
+        console.log("error: " , error)
+        dispatch({type:LOGIN_USER_FAILURE, payload:error.message})
+    }
+}
+
+
+export const register = (registerData) => async (dispatch) => {
+  try {
+    console.log("send data to backend: ", registerData)
+    const { data } = await axios.post(
+      `${API_BASE_URL}/auth/register`,
+      registerData
+    );
+
+    if (data.jwt) {
+      localStorage.setItem("jwt", data.jwt);
+    }
+
+    dispatch({ type: REGISTER_USER_SUCCESS, payload: data.jwt });
+  } catch (error) {
+    console.log("error: ", error);
+    dispatch({ type: REGISTER_USER_FAILURE, payload: error.message });
+  }
+};
+
+export const getUserProfile = (jwt) => async (dispatch) => {
+  try {
+    const { data } = await axios.get(`${API_BASE_URL}/api/users/profile`, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+    });
+
+    dispatch({ type: GET_USER_PROFILE_SUCCESS, payload: data });
+  } catch (error) {
+    console.log("error: ", error);
+    dispatch({ type: GET_USER_PROFILE_FAILURE, payload: error.message });
+  }
+};
+
+export const logout = (jwt) => async (dispatch) => {
+  console.log("ID USER ", jwt);
+  try {
+    const { data } = await axios.post(
+      `${API_BASE_URL}/auth/logout`,
+      {}, // Body trống vì không cần gửi dữ liệu
+      {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      }
+    );
+    if (data) {
+      console.log("is login: ", data);
+      localStorage.removeItem("jwt");
+      dispatch({ type: LOGOUT, payload: data });
+    }
+  } catch (error) {
+    console.log("error: ", error);
+    dispatch({ type: LOGOUT, payload: null });
+  }
+};
+
+
+
+export const loginGoole = (token) => async (dispatch) => {
+  try {
+    const { data } = await axios.post(`${API_BASE_URL}/auth/google`, token);
+    console.log("logedin user ", data.jwt);
+    if (data.jwt) {
+      localStorage.setItem("jwt", data.jwt);
+    }
+
+    dispatch({ type: LOGIN_GOOGLE_SUCCESS, payload: data.jwt });
+  } catch (error) {
+    console.log("error: ", error);
+    dispatch({ type: LOGIN_GOOGLE_FAILURE, payload: error.message });
+  }
+};
