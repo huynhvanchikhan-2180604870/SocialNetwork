@@ -8,6 +8,6 @@ import java.util.UUID;
 public class LikeDto {
     private UUID id;
     private UserDto user;
-    private TwitDto twit;
+    private PostDto post;
 
 }

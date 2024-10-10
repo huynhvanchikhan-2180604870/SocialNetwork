@@ -1,7 +1,7 @@
 package com.hok.social.dto.mapper;
 
 import com.hok.social.dto.LikeDto;
-import com.hok.social.dto.TwitDto;
+import com.hok.social.dto.PostDto;
 import com.hok.social.dto.UserDto;
 import com.hok.social.entities.Like;
 import com.hok.social.entities.User;
@@ -13,12 +13,12 @@ public class LikeDtoMapper {
     public static LikeDto toLikeDto(Like like, User reqUser){
         UserDto user = UserDtoMapper.toUserDto(like.getUser());
         UserDto reqUserDto = UserDtoMapper.toUserDto(reqUser);
-        TwitDto twitDto = TwitDtoMapper.toTwitDto(like.getTwit(), reqUser);
+        PostDto postDto = PostDtoMapper.toPostDto(like.getPost(), reqUser);
         LikeDto likeDto = new LikeDto();
 
         likeDto.setId(like.getId());
         likeDto.setUser(user);
-        likeDto.setTwit(twitDto);
+        likeDto.setPost(postDto);
 
         return likeDto;
     }
@@ -27,12 +27,12 @@ public class LikeDtoMapper {
         List<LikeDto> likeDtos = new ArrayList<>();
         for (Like like : likes) {
             UserDto user = UserDtoMapper.toUserDto(like.getUser());
-            TwitDto twitDto = TwitDtoMapper.toTwitDto(like.getTwit(), reqUser);
+            PostDto postDto = PostDtoMapper.toPostDto(like.getPost(), reqUser);
             LikeDto likeDto = new LikeDto();
 
             likeDto.setId(like.getId());
             likeDto.setUser(user);
-            likeDto.setTwit(twitDto);
+            likeDto.setPost(postDto);
             likeDtos.add(likeDto);
         }
         return likeDtos;

@@ -6,9 +6,9 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
-public class TwitReplyReques {
+public class PostReplyReques {
     private String content;
-    private UUID twit_id;
+    private UUID post_id;
     private LocalDateTime created_at;
     private String image;
 

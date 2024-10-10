@@ -3,8 +3,11 @@ import ImageIcon from "@mui/icons-material/Image";
 import TagFacesIcon from "@mui/icons-material/TagFaces";
 import { Avatar, Button } from "@mui/material";
 import { useFormik } from "formik";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import * as Yup from "yup";
+import { createPost, getAllPosts } from "../../store/Post/Action";
+import { uploadToCloudnary } from "../../utils/uploadToCloudnary";
 import TweetCard from "./TweetCard";
 
 const validationSchema = Yup.object().shape({
@@ -14,8 +17,15 @@ const validationSchema = Yup.object().shape({
 const HomeSection = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [selectImage, setSelectImage] = useState("");
-
-  const handleSubmit = (values) => {
+  const dispatch = useDispatch();
+  const { post } = useSelector((store) => store);
+  const { auth } = useSelector((store) => store);
+  console.log("Posts: ", post);
+  const handleSubmit = (values, actions) => {
+    dispatch(createPost(values));
+    actions.resetForm();
+    setSelectImage("");
+    setUploadingImage(false);
     console.log("values: ", values);
   };
   const formik = useFormik({
@@ -27,24 +37,25 @@ const HomeSection = () => {
     validationSchema,
   });
 
-  const handleSelectImage = (event) => {
+  const handleSelectImage = async (event) => {
     setUploadingImage(true);
-    const imageUrl = event.target.files[0];
+    const imageUrl = await uploadToCloudnary(event.target.files[0]);
     formik.setFieldValue("image", imageUrl);
     setSelectImage(imageUrl);
     setUploadingImage(false);
   };
+
+  useEffect(() => {
+    dispatch(getAllPosts());
+  }, [post.like, post.repost, post.post]);
   return (
     <div className="space-y-5">
-      <section className=" bg-white sticky top-0">
-        <h1 className="py-5 text-xl font-bold opacity-90">Home</h1>
+      <section className=" bg-white sticky top-0 ">
+        <h1 className="py-5 text-xl font-bold opacity-100">Home</h1>
       </section>
       <section className={`pb-10`}>
         <div className="flex space-x-5">
-          <Avatar
-            alt="username"
-            src="http://res.cloudinary.com/dnbw04gbs/image/upload/v1690639851/instagram%20post/bywtgh9vj4e80aywstss.png"
-          />
+          <Avatar alt="username" src={auth?.user?.image} />
           <div className="w-full">
             <form onSubmit={formik.handleSubmit}>
               <div>
@@ -89,14 +100,15 @@ const HomeSection = () => {
                   </Button>
                 </div>
               </div>
+              <div>{selectImage && <img src={selectImage} alt="" />}</div>
             </form>
           </div>
         </div>
       </section>
 
       <section>
-        {[1, 1, 1, 1, 1].map((item) => (
-          <TweetCard />
+        {post.posts.map((item) => (
+          <TweetCard item={item} />
         ))}
       </section>
     </div>

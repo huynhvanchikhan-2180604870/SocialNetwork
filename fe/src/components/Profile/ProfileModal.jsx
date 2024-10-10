@@ -1,10 +1,12 @@
 import CloseIcon from "@mui/icons-material/Close";
-import { Avatar, IconButton, TextField } from "@mui/material";
+import { Avatar, Grid, IconButton, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
 import { useFormik } from "formik";
 import * as React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { updateUserProfile } from "../../store/Auth/Action";
 
 const style = {
   position: "absolute",
@@ -19,24 +21,58 @@ const style = {
   p: 4,
   outline: "none",
 };
-
+const currentYear = new Date().getFullYear();
+const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
+const days = Array.from({ length: 31 }, (_, i) => i + 1);
+const months = [
+  { value: 1, label: "January" },
+  { value: 2, label: "February" },
+  { value: 3, label: "March" },
+  { value: 4, label: "April" },
+  { value: 5, label: "May" },
+  { value: 6, label: "June" },
+  { value: 7, label: "July" },
+  { value: 8, label: "August" },
+  { value: 9, label: "September" },
+  { value: 10, label: "October" },
+  { value: 11, label: "November" },
+  { value: 12, label: "December" },
+];
 export default function ProfileModal({open, handleClose}) {
 
   const [uploading, setUploading] = React.useState(false)
-
+  const dispatch = useDispatch()
+  const jwt = localStorage.getItem("jwt");
+  const { auth } = useSelector((store) => store);
 
   const handleSubmit = (values) => {
-    console.log(values)
+    console.log("data: ",values)
+    const { day, month, year } = values.birth_day;
+    const birth_day = `${year}-${month}-${day}`;
+    values.birth_day = birth_day;
+    dispatch(updateUserProfile(values));
+  };
+
+  const handleDateChange = (name) => (event) => {
+    formik.setFieldValue("birth_day", {
+      ...formik.values.birth_day,
+      [name]: event.target.value,
+    });
   };
 
   const formik = useFormik({
     initialValues: {
-      fullName: "",
+      full_name: "",
       website: "",
       location: "",
       bio: "",
-      backgroundImage: "",
+      backgroud_image: "",
       image: "",
+      birth_day: {
+        day: "",
+        month: "",
+        year: "",
+      },
     },
     onSubmit: handleSubmit,
   });
@@ -80,7 +116,7 @@ export default function ProfileModal({open, handleClose}) {
                     <input
                       type="file"
                       className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
-                      name="backgroundImage"
+                      name="backgroud_image"
                       onChange={handleImageChange}
                     />
                   </div>
@@ -90,7 +126,7 @@ export default function ProfileModal({open, handleClose}) {
                   <div className="relative">
                     <Avatar
                       alt="username"
-                      src="https://cdn.pixabay.com/photo/2020/07/01/12/58/icon-5359553_960_720.png"
+                      src={auth.user?.image}
                       sx={{
                         width: "10rem",
                         height: "10rem",
@@ -109,15 +145,17 @@ export default function ProfileModal({open, handleClose}) {
               <div className="space-y-3">
                 <TextField
                   fullWidth
-                  id="fullName"
-                  name="fullName"
+                  id="full_name"
+                  name="full_name"
                   label="Full Name"
-                  value={formik.values.fullName}
+                  value={formik.values.full_name}
                   onChange={formik.handleChange}
                   error={
-                    formik.touched.fullName && Boolean(formik.errors.fullName)
+                    formik.touched.full_name && Boolean(formik.errors.full_name)
                   }
-                  helperText={formik.touched.fullName && formik.errors.fullName}
+                  helperText={
+                    formik.touched.full_name && formik.errors.full_name
+                  }
                 />
 
                 <TextField
@@ -159,9 +197,57 @@ export default function ProfileModal({open, handleClose}) {
                   helperText={formik.touched.location && formik.errors.location}
                 />
 
-                <div className="my-3">
-                  <p className="text-lg">Birth date . Edit</p>
-                  <p className="text-2xl">October 24, 2003</p>
+                <div className="flex justify-between items-center">
+                  <Grid item xs={4}>
+                    <InputLabel>Date</InputLabel>
+                    <Select
+                      fullWidth
+                      name="day"
+                      value={formik.values.birth_day.day}
+                      onChange={handleDateChange("day")}
+                      onBlur={formik.handleBlur}
+                    >
+                      {days.map((day) => (
+                        <MenuItem key={day} value={day}>
+                          {day}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </Grid>
+
+                  <Grid item xs={4}>
+                    <InputLabel>Month</InputLabel>
+                    <Select
+                      fullWidth
+                      name="month"
+                      value={formik.values.birth_day.month}
+                      onChange={handleDateChange("month")}
+                      onBlur={formik.handleBlur}
+                    >
+                      {months.map((month) => (
+                        <MenuItem key={month.label} value={month.value}>
+                          {month.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </Grid>
+
+                  <Grid item xs={4}>
+                    <InputLabel>Year</InputLabel>
+                    <Select
+                      fullWidth
+                      name="year"
+                      value={formik.values.birth_day.year}
+                      onChange={handleDateChange("year")}
+                      onBlur={formik.handleBlur}
+                    >
+                      {years.map((year) => (
+                        <MenuItem key={year} value={year}>
+                          {year}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </Grid>
                 </div>
 
                 <p className="py-3 text-lg">Edit Professional Profile</p>

@@ -57,7 +57,7 @@ public class UserController {
     public ResponseEntity<UserDto> updateUser(@RequestBody User req,
                                                     @RequestHeader("Authorization") String jwt) throws UserException {
         User requser = userService.findUserProfileByJwt(jwt);
-        User user = userService.updateUser(req.getId(), req);
+        User user = userService.updateUser(requser.getId(), req);
 
 
         UserDto userDto = UserDtoMapper.toUserDto(user);
