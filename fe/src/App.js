@@ -9,12 +9,13 @@ import { getUserProfile } from "./store/Auth/Action";
 function App() {
   const jwt = localStorage.getItem("jwt");
   const {auth} = useSelector(store => store)
+  const { post } = useSelector((store) => store);
   const dispatch = useDispatch()
-  useEffect(() =>{
-    if(jwt){
-      dispatch(getUserProfile(jwt))
+  useEffect(() => {
+    if (jwt) {
+      dispatch(getUserProfile(jwt));
     }
-  }, [auth.jwt])
+  }, [auth.jwt, post.like, post.repost, post.post]);
   return (
     
     <div className="">

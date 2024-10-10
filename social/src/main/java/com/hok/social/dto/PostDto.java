@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 @Data
-public class TwitDto {
+public class PostDto {
     private UUID id;
     private String content;
     private String image;
@@ -15,9 +15,9 @@ public class TwitDto {
     private LocalDateTime createdAt;
     private int totalLikes;
     private int totalReplies;
-    private int totalRetweets;
+    private int totalRepost;
     private boolean isLiked;
-    private boolean isRetwit;
+    private boolean isRepost;
     private List<UUID>retwitUsersId;
-    private List<TwitDto> replyTwits;
+    private List<PostDto> replyPost;
 }

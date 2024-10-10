@@ -17,6 +17,8 @@ import ImageIcon from "@mui/icons-material/Image";
 import TagFacesIcon from "@mui/icons-material/TagFaces";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { useDispatch, useSelector } from "react-redux";
+import { createPostReply } from "../../store/Post/Action";
 
 const validationSchema = Yup.object().shape({
   content: Yup.string().required("Tweet text is required"),
@@ -36,18 +38,24 @@ const style = {
   borderRadius: "20px"
 };
 
-export default function ReplyModal({ open, handleClose }) {
+export default function ReplyModal({ open, handleClose, item }) {
   const [uploadingImage, setUploadingImage] = React.useState(false);
   const [selectImage, setSelectImage] = React.useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch()
+  const {auth} = useSelector(state => state)
+  console.log("item for reply: ", item)
 const handleSubmit = (values) => {
   console.log("values: ", values);
+
+  dispatch(createPostReply(values));
+  handleClose()
 };
   const formik = useFormik({
     initialValues: {
       content: "",
       image: "",
-      twitId:4
+      post_id: item?.id,
     },
     onSubmit: handleSubmit,
     validationSchema,
@@ -71,46 +79,49 @@ const handleSubmit = (values) => {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <div className="flex space-x-5">
-            <Avatar
-              onClick={() => navigate(`/profile/${6}`)}
-              className="cursor-pointer"
-              alt="username"
-              src="http://res.cloudinary.com/dnbw04gbs/image/upload/v1690639851/instagram%20post/bywtgh9vj4e80aywstss.png"
-            />
+          {item?.replyPost?.map((post) => (
+            <div className="flex space-x-5" key={post.id}>
+              <Avatar
+                onClick={() => navigate(`/profile/${post?.user?.id}`)}
+                className="cursor-pointer"
+                alt="username"
+                src={post?.user?.image}
+              />
 
-            <div className="w-full">
-              <div className="flex justify-between items-center">
-                <div className="flex cursor-pointer items-center space-x-2">
-                  <span className="font-semibold">Code With Zosh</span>
-                  <span className="text-gray-600">@codewithzosh . 2m</span>
-                  <img
-                    className="ml-2 w-5 h-5"
-                    src="https://abs.twimg.com/responsive-web/client-web/verification-card-v2@3x.8ebee01a.png"
-                    alt=""
-                  />
+              <div className="w-full">
+                <div className="flex justify-between items-center">
+                  <div className="flex cursor-pointer items-center space-x-2">
+                    <span className="font-semibold">
+                      {post?.user?.fullName}
+                    </span>
+                    <span className="text-gray-600">
+                      {/* @{post?.user?.fullName.split(" ").join("_").toLowerCase()}{" "} */}
+                      . 2m
+                    </span>
+                    
+                      <img
+                        className="ml-2 w-5 h-5"
+                        src="https://abs.twimg.com/responsive-web/client-web/verification-card-v2@3x.8ebee01a.png"
+                        alt=""
+                      />
+                  </div>
                 </div>
-              </div>
 
-              <div className="mt-2">
-                <div
-                  onClick={() => navigate(`/twit/${3}`)}
-                  className="cursor-pointer"
-                >
-                  <p className="mb-2 p-0">
-                    twitter clone - full stack project with spring boot and
-                    react
-                  </p>
+                <div className="mt-2">
+                  <div
+                    onClick={() => navigate(`/twit/${item?.id}`)}
+                    className="cursor-pointer"
+                  >
+                    <p className="mb-2 p-0">{post?.content}</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          ))}
+
           <section className={`py-10`}>
             <div className="flex space-x-5">
-              <Avatar
-                alt="username"
-                src="http://res.cloudinary.com/dnbw04gbs/image/upload/v1690639851/instagram%20post/bywtgh9vj4e80aywstss.png"
-              />
+              <Avatar alt="username" src={auth.user?.image} />
               <div className="w-full">
                 <form onSubmit={formik.handleSubmit}>
                   <div>

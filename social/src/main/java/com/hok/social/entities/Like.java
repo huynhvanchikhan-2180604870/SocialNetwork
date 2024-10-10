@@ -20,7 +20,7 @@ public class Like {
     private User user;
 
     @ManyToOne
-    private Twit twit;
+    private Post post;
 
 
 }

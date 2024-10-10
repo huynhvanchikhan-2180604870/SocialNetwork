@@ -1,7 +1,7 @@
 import axios from "axios"
-import { API_BASE_URL } from "../../config/api"
+import { api, API_BASE_URL } from "../../config/api"
 import { type } from "@testing-library/user-event/dist/type";
-import { GET_USER_PROFILE_FAILURE, GET_USER_PROFILE_SUCCESS, LOGIN_GOOGLE_FAILURE, LOGIN_GOOGLE_SUCCESS, LOGIN_USER_FAILURE, LOGIN_USER_SUCCESS, LOGOUT, REGISTER_USER_FAILURE, REGISTER_USER_SUCCESS } from "./ActionType";
+import { FIND_USER_BY_ID_FAILURE, FIND_USER_BY_ID_SUCCESS, GET_USER_PROFILE_FAILURE, GET_USER_PROFILE_SUCCESS, LOGIN_GOOGLE_FAILURE, LOGIN_GOOGLE_SUCCESS, LOGIN_USER_FAILURE, LOGIN_USER_SUCCESS, LOGOUT, REGISTER_USER_FAILURE, REGISTER_USER_SUCCESS, UPDATE_USER_FAILURE, UPDATE_USER_SUCCESS } from "./ActionType";
 
 export const loginUser = (loginData) => async(dispatch) =>{
     try{
@@ -91,5 +91,41 @@ export const loginGoole = (token) => async (dispatch) => {
   } catch (error) {
     console.log("error: ", error);
     dispatch({ type: LOGIN_GOOGLE_FAILURE, payload: error.message });
+  }
+};
+
+
+export const findUserById = (userId) => async (dispatch) => {
+  try {
+    const { data } = await api.get(`/api/users/${userId}`);
+
+    dispatch({ type: FIND_USER_BY_ID_SUCCESS, payload: data });
+  } catch (error) {
+    console.log("error: ", error);
+    dispatch({ type: FIND_USER_BY_ID_FAILURE, payload: error.message });
+  }
+};
+
+
+export const updateUserProfile = (reqData) => async (dispatch) => {
+  try {
+    console.log("request: ", reqData);
+    const { data } = await api.put(`/api/users/update`, reqData);
+    console.log("respone: ", data)
+    dispatch({ type: UPDATE_USER_SUCCESS, payload: data });
+  } catch (error) {
+    console.log("error: ", error);
+    dispatch({ type: UPDATE_USER_FAILURE, payload: error.message });
+  }
+};
+
+export const followUser = (userId) => async (dispatch) => {
+  try {
+    const { data } = await api.put(`/api/users/${userId}/follow`);
+    console.log("Follow: ", data)
+    dispatch({ type: UPDATE_USER_SUCCESS, payload: data });
+  } catch (error) {
+    console.log("error: ", error);
+    dispatch({ type: UPDATE_USER_FAILURE, payload: error.message });
   }
 };

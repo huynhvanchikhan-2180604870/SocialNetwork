@@ -1,12 +1,12 @@
 package com.hok.social.util;
 
 import com.hok.social.entities.Like;
-import com.hok.social.entities.Twit;
+import com.hok.social.entities.Post;
 import com.hok.social.entities.User;
 
-public class TwitUtil {
-    public final static boolean isLikeByReqUser(User reqUser, Twit twit){
-        for(Like like : twit.getLikes()){
+public class PostUtil {
+    public final static boolean isLikeByReqUser(User reqUser, Post post){
+        for(Like like : post.getLikes()){
             if(like.getUser().getId().equals(reqUser.getId())){
                 return true;
             }
@@ -14,8 +14,8 @@ public class TwitUtil {
         return false;
     }
 
-    public final static boolean isRetwitedByReqUser(User reqUser, Twit twit){
-        for(User user : twit.getRetwitUsers()){
+    public final static boolean isRepostedByReqUser(User reqUser, Post post){
+        for(User user : post.getRepostUsers()){
             if(user.getId().equals(reqUser.getId())){
                 return true;
             }
