@@ -13,6 +13,7 @@ import com.hok.social.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,12 +26,17 @@ public class PostController {
     private PostService postService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @PostMapping("/create")
     public ResponseEntity<PostDto> createTwit(@RequestBody Post req, @RequestHeader("Authorization") String jwt) throws UserException {
         User user = userService.findUserProfileByJwt(jwt);
         Post post = postService.createPost(req, user);
         PostDto postDto = PostDtoMapper.toPostDto(post, user);
+        // Phát thông báo về bài viết mới qua WebSocket
+        // Send WebSocket notification
+        messagingTemplate.convertAndSend("/topic/newPosts", PostDtoMapper.toPostDto(post, user));
         return new ResponseEntity<>(postDto, HttpStatus.CREATED);
     }
 
@@ -39,6 +45,8 @@ public class PostController {
         User user = userService.findUserProfileByJwt(jwt);
         Post post = postService.createdReply(req, user);
         PostDto postDto = PostDtoMapper.toPostDto(post, user);
+        // Phát thông báo reply qua WebSocket
+        messagingTemplate.convertAndSend("/topic/replies", postDto);
         return new ResponseEntity<>(postDto, HttpStatus.CREATED);
     }
 
@@ -47,6 +55,8 @@ public class PostController {
         User user = userService.findUserProfileByJwt(jwt);
         Post post = postService.rePost(post_id, user);
         PostDto postDto = PostDtoMapper.toPostDto(post, user);
+        // Phát thông báo về repost qua WebSocket
+        messagingTemplate.convertAndSend("/topic/messages", postDto);
         return new ResponseEntity<>(postDto, HttpStatus.OK);
     }
 
@@ -55,6 +65,8 @@ public class PostController {
         User user = userService.findUserProfileByJwt(jwt);
         Post post = postService.findById(post_id);
         PostDto postDto = PostDtoMapper.toPostDto(post, user);
+        // Phát thông báo về like/unlike qua WebSocket
+        messagingTemplate.convertAndSend("/topic/likes", postDto);
         return new ResponseEntity<>(postDto, HttpStatus.OK);
     }
 

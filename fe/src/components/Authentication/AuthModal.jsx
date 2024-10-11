@@ -20,22 +20,6 @@ const style = {
 };
 
 export default function AuthModal({ open, handleClose, path }) {
-  //   // Hàm để chuyển đổi giữa đăng ký và đăng nhập
-  //   const handleTogglePath = () => {
-  //     if (path === "/register") {
-  //       navigatePath("/register");
-  //     } else {
-  //       navigatePath("/login");
-  //     }
-  //   };
-
-  //   // Điều hướng giữa các đường dẫn
-  //   const navigatePath = (newPath) => {
-  //     handleClose(); // Đóng modal hiện tại
-  //     setTimeout(() => {
-  //     //   handleOpen(newPath); // Mở lại modal với đường dẫn mới
-  //     }, 300); // Thêm độ trễ để có hiệu ứng chuyển đổi mượt hơn (nếu muốn)
-  //   };
 
   console.log("path: ", path);
 
@@ -47,14 +31,14 @@ export default function AuthModal({ open, handleClose, path }) {
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={style}>
-          <h1 className="text-center font-bold text-3xl pb-20">
+        <Box sx={{ ...style, width: "90%", maxWidth: "550px" }}>
+          <h1 className="text-center font-bold text-xl lg:text-3xl pb-10 lg:pb-20">
             {path === "register"
               ? "Create your account"
               : "Login to your account"}
           </h1>
           {path === "register" ? <SignupForm /> : <SigninForm />}
-          <h1 className="text-center py-5 font-semibold text-lg text-gray-500">
+          <h1 className="text-center py-3 lg:py-5 font-semibold text-sm lg:text-lg text-gray-500">
             {path === "register"
               ? "Already have an Account?"
               : "If you don't have an account"}
@@ -62,7 +46,7 @@ export default function AuthModal({ open, handleClose, path }) {
           <Button
             variant="outlined"
             // onClick={}
-            sx={{ borderRadius: "29px", py: "15px" }}
+            sx={{ borderRadius: "29px", py: "10px", lg: "15px" }}
             fullWidth
           >
             {path === "login" ? "Login" : "Create Account"}

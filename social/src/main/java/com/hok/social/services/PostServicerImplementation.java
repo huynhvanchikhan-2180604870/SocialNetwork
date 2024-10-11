@@ -7,6 +7,7 @@ import com.hok.social.exception.UserException;
 import com.hok.social.repositories.PostRepository;
 import com.hok.social.request.PostReplyReques;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,7 +18,8 @@ import java.util.UUID;
 public class PostServicerImplementation implements PostService {
     @Autowired
     private PostRepository postRepository;
-
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
     @Override
     public Post createPost(Post req, User user) throws UserException {
         Post post = new Post();
@@ -29,6 +31,7 @@ public class PostServicerImplementation implements PostService {
         post.setImage(req.getImage());
         post.setVideo(req.getVideo());
         post.setPost(true);
+
         return postRepository.save(post);
     }
 

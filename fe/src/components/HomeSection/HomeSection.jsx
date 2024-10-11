@@ -6,9 +6,20 @@ import { useFormik } from "formik";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import * as Yup from "yup";
-import { createPost, getAllPosts } from "../../store/Post/Action";
+import {
+  addNewLike,
+  addNewPost,
+  addNewReply,
+  createPost,
+  getAllPosts,
+  updatePost,
+} from "../../store/Post/Action";
 import { uploadToCloudnary } from "../../utils/uploadToCloudnary";
 import TweetCard from "./TweetCard";
+import {
+  connectWebSocket,
+  disconnectWebSocket,
+} from "../../config/WebSocketService";
 
 const validationSchema = Yup.object().shape({
   content: Yup.string().required("Tweet text is required"),
@@ -17,23 +28,52 @@ const validationSchema = Yup.object().shape({
 const HomeSection = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [selectImage, setSelectImage] = useState("");
+  // const [posts, setPosts] = useState([]);
   const dispatch = useDispatch();
-  const { post } = useSelector((store) => store);
-  const { auth } = useSelector((store) => store);
-  console.log("Posts: ", post);
-  const handleSubmit = (values, actions) => {
-    dispatch(createPost(values));
-    actions.resetForm();
-    setSelectImage("");
-    setUploadingImage(false);
-    console.log("values: ", values);
-  };
+const { auth } = useSelector((state) => state);
+const { post } = useSelector((state) => state);
+const [websocketConnected, setWebsocketConnected] = useState(false);
+
+  useEffect(() => {
+    // Fetch posts only once when component mounts
+    dispatch(getAllPosts());
+
+    // Set up WebSocket connection
+    const { disconnect } = connectWebSocket({
+      onNewPost: (newPost) => {
+        console.log("New post received:", newPost);
+        dispatch(addNewPost(newPost));
+      },
+      onNewReply: (reply) => {
+        console.log("New reply received:", reply);
+        dispatch(addNewReply(reply));
+      },
+      onNewLike: (like) => {
+        console.log("New like received:", like);
+        dispatch(addNewLike(like));
+      },
+    });
+
+    setWebsocketConnected(true);
+
+    // Cleanup function
+    return () => {
+      disconnect();
+      setWebsocketConnected(false);
+    };
+  }, [dispatch, post.posts]);
+
   const formik = useFormik({
     initialValues: {
       content: "",
       image: "",
     },
-    onSubmit: handleSubmit,
+    onSubmit: (values, actions) => {
+      dispatch(createPost(values));
+      actions.resetForm();
+      setSelectImage("");
+      setUploadingImage(false);
+    },
     validationSchema,
   });
 
@@ -45,9 +85,6 @@ const HomeSection = () => {
     setUploadingImage(false);
   };
 
-  useEffect(() => {
-    dispatch(getAllPosts());
-  }, [post.like, post.repost, post.post]);
   return (
     <div className="space-y-5">
       <section className=" bg-white sticky top-0 ">
@@ -107,8 +144,11 @@ const HomeSection = () => {
       </section>
 
       <section>
-        {post.posts.map((item) => (
-          <TweetCard item={item} />
+        {/* {posts.map((post) => (
+          <TweetCard key={post.id} item={post} />
+        ))} */}
+        {post?.posts?.map((post) => (
+          <TweetCard key={post.id} item={post} />
         ))}
       </section>
     </div>

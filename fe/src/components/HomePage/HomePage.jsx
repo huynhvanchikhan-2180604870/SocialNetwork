@@ -9,27 +9,36 @@ import TwitDetails from "../TwitDetails/TwitDetails";
 
 const HomePage = () => {
   return (
-    <Grid container className="px-5 lg:px-36 justify-between">
+    <Grid container className="px-5 lg:px-36 justify-between md:block">
       <Grid
         item
-        xs={false}
+        xs={12}
         lg={2.5}
-        className="hidden lg:block w-full relative"
+        className=" lg:block w-full relative md:block"
       >
         <Navigation />
         {/* <p className="text-center">left part</p> */}
       </Grid>
 
-      <Grid item xs={12} lg={6} className="px-5 lg:px-9 hidden lg:block w-full relative">
+      <Grid
+        item
+        xs={12}
+        lg={6}
+        className="px-5 lg:px-9 lg:block w-full relative md:hidden"
+      >
         <Routes>
           <Route path="/" element={<HomeSection />}></Route>
           <Route path="/profile/:id" element={<Profile />}></Route>
           <Route path="/twit/:id" element={<TwitDetails />}></Route>
         </Routes>
-        
       </Grid>
 
-      <Grid item xs={false} lg={3} className="hidden lg:block w-full relative">
+      <Grid
+        item
+        xs={12}
+        lg={3}
+        className="hidden lg:block w-full relative md:hidden"
+      >
         <RightPart />
       </Grid>
     </Grid>

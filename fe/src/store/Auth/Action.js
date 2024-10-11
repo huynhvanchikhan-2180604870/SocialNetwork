@@ -1,28 +1,37 @@
-import axios from "axios"
-import { api, API_BASE_URL } from "../../config/api"
-import { type } from "@testing-library/user-event/dist/type";
-import { FIND_USER_BY_ID_FAILURE, FIND_USER_BY_ID_SUCCESS, GET_USER_PROFILE_FAILURE, GET_USER_PROFILE_SUCCESS, LOGIN_GOOGLE_FAILURE, LOGIN_GOOGLE_SUCCESS, LOGIN_USER_FAILURE, LOGIN_USER_SUCCESS, LOGOUT, REGISTER_USER_FAILURE, REGISTER_USER_SUCCESS, UPDATE_USER_FAILURE, UPDATE_USER_SUCCESS } from "./ActionType";
+import axios from "axios";
+import { api, API_BASE_URL } from "../../config/api";
+import {
+  FIND_USER_BY_ID_FAILURE,
+  FIND_USER_BY_ID_SUCCESS,
+  GET_USER_PROFILE_FAILURE,
+  GET_USER_PROFILE_SUCCESS,
+  LOGIN_GOOGLE_FAILURE,
+  LOGIN_GOOGLE_SUCCESS,
+  LOGIN_USER_FAILURE,
+  LOGIN_USER_SUCCESS,
+  LOGOUT,
+  REGISTER_USER_FAILURE,
+  REGISTER_USER_SUCCESS,
+  UPDATE_USER_FAILURE,
+  UPDATE_USER_SUCCESS,
+} from "./ActionType";
 
-export const loginUser = (loginData) => async(dispatch) =>{
-    try{
-        console.log("data login: " , loginData)
-        const {data} = await axios.post(`${API_BASE_URL}/auth/login`, loginData)
-        console.log("logedin user ",data)
-        if(data.jwt){
-            localStorage.setItem("jwt", data.jwt);
-        }
+export const loginUser = (loginData) => async (dispatch) => {
+  try {
+    const { data } = await axios.post(`${API_BASE_URL}/auth/login`, loginData);
 
-        dispatch({ type: LOGIN_USER_SUCCESS, payload: data.jwt });
-    }catch(error){
-        console.log("error: " , error)
-        dispatch({type:LOGIN_USER_FAILURE, payload:error.message})
+    if (data.jwt) {
+      localStorage.setItem("jwt", data.jwt);
     }
-}
 
+    dispatch({ type: LOGIN_USER_SUCCESS, payload: data.jwt });
+  } catch (error) {
+    dispatch({ type: LOGIN_USER_FAILURE, payload: error.message });
+  }
+};
 
 export const register = (registerData) => async (dispatch) => {
   try {
-    console.log("send data to backend: ", registerData)
     const { data } = await axios.post(
       `${API_BASE_URL}/auth/register`,
       registerData
@@ -34,7 +43,6 @@ export const register = (registerData) => async (dispatch) => {
 
     dispatch({ type: REGISTER_USER_SUCCESS, payload: data.jwt });
   } catch (error) {
-    console.log("error: ", error);
     dispatch({ type: REGISTER_USER_FAILURE, payload: error.message });
   }
 };
@@ -49,13 +57,11 @@ export const getUserProfile = (jwt) => async (dispatch) => {
 
     dispatch({ type: GET_USER_PROFILE_SUCCESS, payload: data });
   } catch (error) {
-    console.log("error: ", error);
     dispatch({ type: GET_USER_PROFILE_FAILURE, payload: error.message });
   }
 };
 
 export const logout = (jwt) => async (dispatch) => {
-  console.log("ID USER ", jwt);
   try {
     const { data } = await axios.post(
       `${API_BASE_URL}/auth/logout`,
@@ -67,33 +73,27 @@ export const logout = (jwt) => async (dispatch) => {
       }
     );
     if (data) {
-      console.log("is login: ", data);
       localStorage.removeItem("jwt");
       dispatch({ type: LOGOUT, payload: data });
     }
   } catch (error) {
-    console.log("error: ", error);
     dispatch({ type: LOGOUT, payload: null });
   }
 };
 
-
-
 export const loginGoole = (token) => async (dispatch) => {
   try {
     const { data } = await axios.post(`${API_BASE_URL}/auth/google`, token);
-    console.log("logedin user ", data.jwt);
+
     if (data.jwt) {
       localStorage.setItem("jwt", data.jwt);
     }
 
     dispatch({ type: LOGIN_GOOGLE_SUCCESS, payload: data.jwt });
   } catch (error) {
-    console.log("error: ", error);
     dispatch({ type: LOGIN_GOOGLE_FAILURE, payload: error.message });
   }
 };
-
 
 export const findUserById = (userId) => async (dispatch) => {
   try {
@@ -101,20 +101,16 @@ export const findUserById = (userId) => async (dispatch) => {
 
     dispatch({ type: FIND_USER_BY_ID_SUCCESS, payload: data });
   } catch (error) {
-    console.log("error: ", error);
     dispatch({ type: FIND_USER_BY_ID_FAILURE, payload: error.message });
   }
 };
 
-
 export const updateUserProfile = (reqData) => async (dispatch) => {
   try {
-    console.log("request: ", reqData);
     const { data } = await api.put(`/api/users/update`, reqData);
-    console.log("respone: ", data)
+
     dispatch({ type: UPDATE_USER_SUCCESS, payload: data });
   } catch (error) {
-    console.log("error: ", error);
     dispatch({ type: UPDATE_USER_FAILURE, payload: error.message });
   }
 };
@@ -122,10 +118,9 @@ export const updateUserProfile = (reqData) => async (dispatch) => {
 export const followUser = (userId) => async (dispatch) => {
   try {
     const { data } = await api.put(`/api/users/${userId}/follow`);
-    console.log("Follow: ", data)
+
     dispatch({ type: UPDATE_USER_SUCCESS, payload: data });
   } catch (error) {
-    console.log("error: ", error);
     dispatch({ type: UPDATE_USER_FAILURE, payload: error.message });
   }
 };

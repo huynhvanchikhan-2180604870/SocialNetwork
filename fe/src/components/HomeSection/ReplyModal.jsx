@@ -19,6 +19,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import { createPostReply } from "../../store/Post/Action";
+import { formatTimeAgo } from "../../utils/formatTimeAgo";
 
 const validationSchema = Yup.object().shape({
   content: Yup.string().required("Tweet text is required"),
@@ -41,6 +42,9 @@ const style = {
 export default function ReplyModal({ open, handleClose, item }) {
   const [uploadingImage, setUploadingImage] = React.useState(false);
   const [selectImage, setSelectImage] = React.useState("");
+  const [timeAgo, setTimeAgo] = React.useState(
+    item?.createdAt ? formatTimeAgo(item.createdAt) : ""
+  );
   const navigate = useNavigate();
   const dispatch = useDispatch()
   const {auth} = useSelector(state => state)
@@ -70,6 +74,16 @@ const handleSubmit = (values) => {
     setSelectImage(imageUrl);
     setUploadingImage(false);
   };
+
+React.useEffect(() => {
+  if (item?.createdAt) {
+    const interval = setInterval(() => {
+      setTimeAgo(formatTimeAgo(item.createdAt));
+    }, 60000); // Cập nhật mỗi phút
+
+    return () => clearInterval(interval);
+  }
+}, [item?.createdAt]);
   return (
     <div>
       <Modal
@@ -96,14 +110,14 @@ const handleSubmit = (values) => {
                     </span>
                     <span className="text-gray-600">
                       {/* @{post?.user?.fullName.split(" ").join("_").toLowerCase()}{" "} */}
-                      . 2m
+                      {formatTimeAgo(post?.createdAt)} {/* Hiển thị thời gian */}
                     </span>
-                    
-                      <img
-                        className="ml-2 w-5 h-5"
-                        src="https://abs.twimg.com/responsive-web/client-web/verification-card-v2@3x.8ebee01a.png"
-                        alt=""
-                      />
+
+                    <img
+                      className="ml-2 w-5 h-5"
+                      src="https://abs.twimg.com/responsive-web/client-web/verification-card-v2@3x.8ebee01a.png"
+                      alt=""
+                    />
                   </div>
                 </div>
 

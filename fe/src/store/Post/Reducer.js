@@ -1,9 +1,13 @@
 import {
+  ADD_NEW_LIKE,
+  ADD_NEW_POST,
+  ADD_NEW_REPLY,
   FIND_POST_BY_ID_FAILURE,
   FIND_POST_BY_ID_REQUEST,
   FIND_POST_BY_ID_SUCCESS,
   GET_ALL_POSTS_SUCCESS,
   GET_USER_REPOST_FAILURE,
+  GET_USER_REPOST_REQUEST,
   GET_USER_REPOST_RESQUEST,
   GET_USER_REPOST_SUCCESS,
   GET_USERS_POST_SUCCESS,
@@ -18,124 +22,26 @@ import {
   POST_DELETE_SUCCESS,
   REPLY_POST_SUCCESS,
   REPOST_FAILURE,
+  REPOST_REQUEST,
   REPOST_RESQUEST,
   REPOST_SUCCESS,
+  UPDATE_LIKE,
+  UPDATE_POST,
   USER_LIKE_POST_FAILURE,
   USER_LIKE_POST_REQUEST,
   USER_LIKE_POST_SUCCESS,
 } from "./ActionType";
 
-// const initialState = {
-//   loading: false,
-//   data: null,
-//   error: null,
-//   posts: [],
-//   post: null,
-//   like:false
-// };
-
-// export const postReducer = (state = initialState, action) => {
-//   switch (action.type) {
-//     case POST_CREATE_REQUEST:
-//     case POST_DELETE_REQUEST:
-//     case USER_LIKE_POST_REQUEST:
-//     case LIKE_POST_REQUEST:
-//     case REPOST_RESQUEST:
-//     case GET_USER_REPOST_RESQUEST:
-//     case FIND_POST_BY_ID_REQUEST:
-//       return { ...state, loading: true, error: null };
-
-//     case POST_CREATE_FAILURE:
-//     case GET_USER_REPOST_FAILURE:
-//     case POST_DELETE_FAILURE:
-//     case USER_LIKE_POST_FAILURE:
-//     case LIKE_POST_FAILURE:
-//     case REPOST_FAILURE:
-//     case FIND_POST_BY_ID_FAILURE:
-//       return { ...state, loading: false, error: action.payload };
-
-//     case POST_CREATE_SUCCESS:
-//       return {
-//         ...state,
-//         loading: false,
-//         error: null,
-//         posts: [action.payload, ...state.posts],
-//       };
-
-//     case GET_USER_REPOST_SUCCESS:
-//       return {
-//         ...state,
-//         loading: false, // Yêu cầu thành công, ngừng trạng thái loading
-//         reposts: action.payload, // Cập nhật danh sách reposts từ payload
-//         error: null, // Không có lỗi
-//       };
-//     case GET_USERS_POST_SUCCESS:
-//         return {
-//           ...state,
-//           loading: false,
-//           error: null,
-//           userPost: action.payload,
-//         };
-//     case GET_ALL_POSTS_SUCCESS:
-//       return {
-//         ...state,
-//         loading: false,
-//         error: null,
-//         posts: action.payload,
-//       };
-//     case USER_LIKE_POST_SUCCESS:
-//       return {
-//         ...state,
-//         loading: false,
-//         error: null,
-//         likedPosts: action.payload,
-//       };
-
-//     case LIKE_POST_SUCCESS:
-//       return {
-//         ...state,
-//         loading: false,
-//         error: null,
-//         like: action.payload,
-//       };
-//     case POST_DELETE_SUCCESS:
-//       return {
-//         ...state,
-//         loading: false,
-//         error: null,
-//         posts: state.posts.filter((post) => post.id != action.payload),
-//       };
-
-//     case REPOST_SUCCESS:
-//       return {
-//         ...state,
-//         loading: false,
-//         error: null,
-//         repost: action.payload,
-//       };
-
-//     case FIND_POST_BY_ID_SUCCESS:
-//     case REPLY_POST_SUCCESS:
-//       return {
-//         ...state,
-//         loading: false,
-//         error: null,
-//         post: action.payload,
-//       };
-//     default:
-//       return state;
-//   }
-// };
 const initialState = {
   loading: false,
-  data: null,
   error: null,
-  posts: [], // Danh sách tất cả các bài viết
-  post: null, // Bài viết hiện tại được chọn
-  userPosts: [], // Bài viết của người dùng hiện tại
-  reposts: [], // Danh sách repost
-  likedPosts: [], // Danh sách bài viết đã được like
-  like: false, // Trạng thái thích bài viết
+  posts: [],
+  post: null,
+  userPosts: [],
+  reposts: [],
+  likedPosts: [],
+  like: false,
+  postsLoaded: false,
 };
 
 export const postReducer = (state = initialState, action) => {
@@ -144,8 +50,8 @@ export const postReducer = (state = initialState, action) => {
     case POST_DELETE_REQUEST:
     case USER_LIKE_POST_REQUEST:
     case LIKE_POST_REQUEST:
-    case REPOST_RESQUEST:
-    case GET_USER_REPOST_RESQUEST:
+    case REPOST_RESQUEST: // Đã sửa
+    case GET_USER_REPOST_RESQUEST: // Đã sửa
     case FIND_POST_BY_ID_REQUEST:
       return { ...state, loading: true, error: null };
 
@@ -163,14 +69,14 @@ export const postReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         error: null,
-        posts: [action.payload, ...state.posts], // Thêm bài viết mới vào đầu danh sách
+        posts: [action.payload, ...state.posts],
       };
 
     case GET_USER_REPOST_SUCCESS:
       return {
         ...state,
         loading: false,
-        reposts: action.payload, // Cập nhật danh sách repost
+        reposts: action.payload,
         error: null,
       };
 
@@ -179,7 +85,7 @@ export const postReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         error: null,
-        userPosts: action.payload, // Cập nhật danh sách bài viết của người dùng
+        userPosts: action.payload,
       };
 
     case GET_ALL_POSTS_SUCCESS:
@@ -187,7 +93,34 @@ export const postReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         error: null,
-        posts: action.payload, // Cập nhật danh sách tất cả các bài viết
+        posts: action.payload,
+        postsLoaded: true,
+      };
+
+    case REPLY_POST_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        error: null,
+        posts: state.posts.map((post) =>
+          post.id === action.payload.postId
+            ? { ...post, replies: [...post.replies, action.payload] }
+            : post
+        ),
+      };
+
+    case LIKE_POST_SUCCESS:
+      return {
+        ...state,
+        posts: state.posts.map((post) =>
+          post.id === action.payload.postId
+            ? {
+                ...post,
+                likes: action.payload.likes,
+                totalLikes: action.payload.totalLikes,
+              }
+            : post
+        ),
       };
 
     case USER_LIKE_POST_SUCCESS:
@@ -195,15 +128,7 @@ export const postReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         error: null,
-        likedPosts: action.payload, // Cập nhật danh sách bài viết đã like
-      };
-
-    case LIKE_POST_SUCCESS:
-      return {
-        ...state,
-        loading: false,
-        error: null,
-        like: action.payload, // Cập nhật trạng thái like của bài viết
+        likedPosts: action.payload,
       };
 
     case POST_DELETE_SUCCESS:
@@ -211,7 +136,7 @@ export const postReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         error: null,
-        posts: state.posts.filter((post) => post.id !== action.payload), // Xóa bài viết
+        posts: state.posts.filter((post) => post.id !== action.payload),
       };
 
     case REPOST_SUCCESS:
@@ -219,16 +144,38 @@ export const postReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         error: null,
-        reposts: [action.payload, ...state.reposts], // Thêm repost mới
+        reposts: [action.payload, ...state.reposts],
       };
 
     case FIND_POST_BY_ID_SUCCESS:
-    case REPLY_POST_SUCCESS:
       return {
         ...state,
         loading: false,
         error: null,
-        post: action.payload, // Cập nhật bài viết hiện tại
+        post: action.payload,
+      };
+    case ADD_NEW_POST:
+      return {
+        ...state,
+        posts: [action.payload, ...state.posts],
+      };
+    case ADD_NEW_REPLY:
+      return {
+        ...state,
+        posts: state.posts.map((post) =>
+          post.id === action.payload.postId
+            ? { ...post, replies: [...post.replies, action.payload] }
+            : post
+        ),
+      };
+    case ADD_NEW_LIKE:
+      return {
+        ...state,
+        posts: state.posts.map((post) =>
+          post.id === action.payload.postId
+            ? { ...post, likes: [...post.likes, action.payload] }
+            : post
+        ),
       };
 
     default:
