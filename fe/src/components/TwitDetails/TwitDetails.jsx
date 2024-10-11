@@ -26,7 +26,7 @@ const TwitDetails = () => {
           className="cursor-pointer"
           onClick={handleBack}
         />
-        <h1 className="py-5 text-xl font-bold opacity-90 ml-5">Tweet</h1>
+        <h1 className="py-5 text-xl font-bold opacity-90 ml-5">POST</h1>
       </section>
 
       <section>

@@ -38,16 +38,20 @@ public class AppConfig {
         return http.build();
     }
 
-    private  CorsConfigurationSource corsConfigurationSource() {
+    private CorsConfigurationSource corsConfigurationSource() {
         return new CorsConfigurationSource() {
             @Override
             public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                 CorsConfiguration config = new CorsConfiguration();
-                config.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+                config.setAllowedOrigins(Arrays.asList(
+                        "http://localhost:3000",
+                        "http://hockitsystems.id.vn:3000",  // Thêm địa chỉ IP của máy chạy React
+                        "http://192.168.1.5:3000"  // Thêm địa chỉ IP của máy chạy React
+                ));
                 config.setAllowedMethods(Collections.singletonList("*"));
-                config.setAllowCredentials(true);
                 config.setAllowedHeaders(Collections.singletonList("*"));
                 config.setExposedHeaders(Collections.singletonList("Authorization"));
+                config.setAllowCredentials(true);
                 config.setMaxAge(3600L);
                 return config;
             }

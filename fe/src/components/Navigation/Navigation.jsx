@@ -27,7 +27,7 @@ const Navigation = () => {
   };
   const navigate = useNavigate();
   return (
-    <div className=" sticky top-0 h-screen">
+    <div className="md:flex-row container sticky top-0 h-screen">
       <div>
         <div className="py-5">
           <img src={Logo} alt="" style={{ width: "30px", height: "30px" }} />
@@ -65,10 +65,7 @@ const Navigation = () => {
       </div>
       <div className="flex items-center justify-between ">
         <div className="flex items-center space-x-3">
-          <Avatar
-            alt="username"
-            src={auth.user?.image}
-          />
+          <Avatar alt="username" src={auth.user?.image} />
           <div className="">
             <p>{auth.user?.fullName}</p>
             <span className="opacity-70">
