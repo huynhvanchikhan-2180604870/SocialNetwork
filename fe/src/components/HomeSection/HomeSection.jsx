@@ -3,23 +3,20 @@ import ImageIcon from "@mui/icons-material/Image";
 import TagFacesIcon from "@mui/icons-material/TagFaces";
 import { Avatar, Button } from "@mui/material";
 import { useFormik } from "formik";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import * as Yup from "yup";
 import {
   addNewLike,
   addNewPost,
-  addNewReply,
   createPost,
   getAllPosts,
-  updatePost,
+  updatePostLikes,
 } from "../../store/Post/Action";
 import { uploadToCloudnary } from "../../utils/uploadToCloudnary";
 import TweetCard from "./TweetCard";
-import {
-  connectWebSocket,
-  disconnectWebSocket,
-} from "../../config/WebSocketService";
+import { connectWebSocket } from "../../config/WebSocketService";
+import { WebSocketContext } from "../../config/WebSocketContext";
 
 const validationSchema = Yup.object().shape({
   content: Yup.string().required("Tweet text is required"),
@@ -28,52 +25,48 @@ const validationSchema = Yup.object().shape({
 const HomeSection = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [selectImage, setSelectImage] = useState("");
-  // const [posts, setPosts] = useState([]);
   const dispatch = useDispatch();
-const { auth } = useSelector((state) => state);
-const { post } = useSelector((state) => state);
-const [websocketConnected, setWebsocketConnected] = useState(false);
+  const { auth, post } = useSelector((state) => state);
+  const wsConnection = useContext(WebSocketContext); // Access wsConnection
 
+  // Handle submit
+  const handleSubmit = (values, actions) => {
+    dispatch(createPost(values))
+      .then((newPost) => {
+        actions.resetForm();
+        setSelectImage("");
+        setUploadingImage(false);
+
+        // Send message over WebSocket
+        if (wsConnection && wsConnection.connected) {
+          wsConnection.send(
+            "/app/newPost",
+            {},
+            JSON.stringify({
+              action: "NEW_POST",
+              data: newPost, // Use the returned newPost data
+            })
+          );
+        }
+      })
+      .catch((error) => {
+        console.error("Error creating post:", error);
+        // Handle error (e.g., show a notification)
+      });
+  };
+
+
+  // Fetch posts on mount
   useEffect(() => {
-    // Fetch posts only once when component mounts
     dispatch(getAllPosts());
-
-    // Set up WebSocket connection
-    const { disconnect } = connectWebSocket({
-      onNewPost: (newPost) => {
-        console.log("New post received:", newPost);
-        dispatch(addNewPost(newPost));
-      },
-      onNewReply: (reply) => {
-        console.log("New reply received:", reply);
-        dispatch(addNewReply(reply));
-      },
-      onNewLike: (like) => {
-        console.log("New like received:", like);
-        dispatch(addNewLike(like));
-      },
-    });
-
-    setWebsocketConnected(true);
-
-    // Cleanup function
-    return () => {
-      disconnect();
-      setWebsocketConnected(false);
-    };
-  }, [dispatch, post.posts]);
+  }, [dispatch]);
 
   const formik = useFormik({
     initialValues: {
       content: "",
       image: "",
     },
-    onSubmit: (values, actions) => {
-      dispatch(createPost(values));
-      actions.resetForm();
-      setSelectImage("");
-      setUploadingImage(false);
-    },
+    onSubmit: handleSubmit,
     validationSchema,
   });
 

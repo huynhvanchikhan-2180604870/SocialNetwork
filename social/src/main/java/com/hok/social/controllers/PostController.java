@@ -34,9 +34,9 @@ public class PostController {
         User user = userService.findUserProfileByJwt(jwt);
         Post post = postService.createPost(req, user);
         PostDto postDto = PostDtoMapper.toPostDto(post, user);
+
         // Phát thông báo về bài viết mới qua WebSocket
-        // Send WebSocket notification
-        messagingTemplate.convertAndSend("/topic/newPosts", PostDtoMapper.toPostDto(post, user));
+        messagingTemplate.convertAndSend("/topic/newPosts", postDto);
         return new ResponseEntity<>(postDto, HttpStatus.CREATED);
     }
 
@@ -56,7 +56,7 @@ public class PostController {
         Post post = postService.rePost(post_id, user);
         PostDto postDto = PostDtoMapper.toPostDto(post, user);
         // Phát thông báo về repost qua WebSocket
-        messagingTemplate.convertAndSend("/topic/messages", postDto);
+//        messagingTemplate.convertAndSend("/topic/messages", postDto);
         return new ResponseEntity<>(postDto, HttpStatus.OK);
     }
 
@@ -66,7 +66,7 @@ public class PostController {
         Post post = postService.findById(post_id);
         PostDto postDto = PostDtoMapper.toPostDto(post, user);
         // Phát thông báo về like/unlike qua WebSocket
-        messagingTemplate.convertAndSend("/topic/likes", postDto);
+
         return new ResponseEntity<>(postDto, HttpStatus.OK);
     }
 

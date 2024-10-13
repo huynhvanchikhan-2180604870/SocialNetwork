@@ -48,7 +48,6 @@ export default function ReplyModal({ open, handleClose, item }) {
   const navigate = useNavigate();
   const dispatch = useDispatch()
   const {auth} = useSelector(state => state)
-  console.log("item for reply: ", item)
 const handleSubmit = (values) => {
   console.log("values: ", values);
 

@@ -27,7 +27,10 @@ const HomePage = () => {
         className="px-5 lg:px-9 lg:block w-full relative md:hidden"
       >
         <Routes>
-          <Route path="/" element={<HomeSection />}></Route>
+          <Route
+            path="/"
+            element={<HomeSection  />}
+          ></Route>
           <Route path="/profile/:id" element={<Profile />}></Route>
           <Route path="/twit/:id" element={<TwitDetails />}></Route>
         </Routes>

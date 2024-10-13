@@ -1,65 +1,83 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import Authentication from "./components/Authentication/Authentication";
 import HomePage from "./components/HomePage/HomePage";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { store } from "./store/store";
+import { connectWebSocket } from "./config/WebSocketService";
 import { getUserProfile } from "./store/Auth/Action";
-import WebSocketService, { connectWebSocket, disconnectWebSocket } from "./config/WebSocketService";
-import { addNewLike, addNewPost, addNewReply, updateLike } from "./store/Post/Action";
+import { addNewLike, addNewPost, addNewReply } from "./store/Post/Action";
+import { WebSocketContext } from "./config/WebSocketContext";
 function App() {
   const jwt = localStorage.getItem("jwt");
-  const { auth } = useSelector((store) => store);
+  const { auth, post } = useSelector((store) => store);
   const dispatch = useDispatch();
- const [wsConnection, setWsConnection] = useState(null);
-useEffect(() => {
-  const jwt = localStorage.getItem("jwt");
-  if (jwt) {
-    dispatch(getUserProfile(jwt));
-  }
-}, [dispatch, auth?.jwt]);
+  const [wsConnection, setWsConnection] = useState(null);
 
-const websocketCallbacks = useMemo(
-  () => ({
-    onNewPost: (newPost) => {
-      dispatch(addNewPost(newPost));
-      dispatch({ type: "UPDATE_POSTS_LIST", payload: newPost });
-    },
-    onNewReply: (reply) => dispatch(addNewReply(reply)),
-    onNewLike: (like) => dispatch(addNewLike(like)),
-  }),
-  [dispatch]
-);
-
-const connectWebSocketCallback = useCallback(() => {
-  if (auth.user && !wsConnection) {
-    const connection = connectWebSocket(websocketCallbacks);
-    setWsConnection(connection);
-  }
-}, [auth.user, wsConnection, websocketCallbacks]);
-
-useEffect(() => {
-  connectWebSocketCallback();
-
-  return () => {
-    if (wsConnection) {
-      wsConnection.disconnect();
-      setWsConnection(null);
+  // Lấy thông tin người dùng khi có JWT
+  useEffect(() => {
+    if (jwt) {
+      dispatch(getUserProfile(jwt));
     }
-  };
-}, [connectWebSocketCallback, wsConnection]);
+  }, [dispatch, jwt]);
+
+  // Set up WebSocket connection
+  useEffect(() => {
+    if (auth.user && !wsConnection) {
+      const stompClient = connectWebSocket();
+
+      stompClient.connect(
+        {},
+        () => {
+          console.log("WebSocket connected");
+
+          // Subscribe to topics
+          stompClient.subscribe("/topic/newPosts", (message) => {
+            const messageBody = JSON.parse(message.body);
+            dispatch(addNewPost(messageBody));
+          });
+
+          stompClient.subscribe("/topic/likes", (message) => {
+            const likeDto = JSON.parse(message.body);
+            if (likeDto.user.id !== auth.user.id) {
+              dispatch(addNewLike(likeDto));
+            }
+          });
+
+
+          stompClient.subscribe("/topic/replies", (message) => {
+            const replyBody = JSON.parse(message.body);
+            dispatch(addNewReply(replyBody));
+          });
+
+          setWsConnection(stompClient);
+        },
+        (error) => {
+          console.error("WebSocket connection error:", error);
+        }
+      );
+    }
+
+    return () => {
+      if (wsConnection) {
+        wsConnection.disconnect(() => {
+          console.log("WebSocket disconnected");
+        });
+      }
+    };
+  }, [auth.user, wsConnection, dispatch]);
 
   return (
-    
-    <div className="">
-      <Routes>
-        <Route
-          path="/*"
-          element={auth.user ? <HomePage /> : <Authentication />}
-        ></Route>
-      </Routes>
-    </div>
+    <WebSocketContext.Provider value={wsConnection}>
+      <div className="">
+        <Routes>
+          <Route
+            path="/*"
+            element={auth.user ? <HomePage /> : <Authentication />}
+          ></Route>
+        </Routes>
+      </div>
+    </WebSocketContext.Provider>
   );
 }
 

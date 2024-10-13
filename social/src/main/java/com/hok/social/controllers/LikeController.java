@@ -11,6 +11,7 @@ import com.hok.social.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,12 +26,17 @@ public class LikeController {
     @Autowired
     private LikeService likeService;
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
     @PostMapping("/{post_id}/likes")
     public ResponseEntity<LikeDto> likeTwit(@PathVariable UUID post_id, @RequestHeader("Authorization") String jwt)throws UserException, PostException {
         User user = userService.findUserProfileByJwt(jwt);
         Like like = likeService.likePost(post_id, user);
 
         LikeDto likeDto = LikeDtoMapper.toLikeDto(like, user);
+
+        messagingTemplate.convertAndSend("/topic/likes", likeDto);
         return new ResponseEntity<>(likeDto, HttpStatus.CREATED);
     }
 
