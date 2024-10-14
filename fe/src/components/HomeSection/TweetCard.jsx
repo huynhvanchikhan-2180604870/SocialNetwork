@@ -6,24 +6,31 @@ import FileUploadIcon from "@mui/icons-material/FileUpload";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import { Avatar, Button, Menu, MenuItem } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import React, { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { createRepost, likePost } from "../../store/Post/Action";
+import {
+  createRepost,
+  likePost,
+  updatePostLikes,
+} from "../../store/Post/Action";
 import ReplyModal from "./ReplyModal";
 import { formatTimeAgo } from "../../utils/formatTimeAgo";
 
 const TweetCard = ({ item }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [openReplyModal, setOpenReplyModal] = useState(false);
+  const { auth } = useSelector((state) => state);
+  const post = useSelector((state) =>
+    state.post.posts.find((p) => p.id === item.id)
+  );
+  const [timeAgo, setTimeAgo] = useState(
+    item?.createdAt ? formatTimeAgo(item.createdAt) : ""
+  );
 
-const [timeAgo, setTimeAgo] = useState(
-  item?.createdAt ? formatTimeAgo(item.createdAt) : ""
-);
-
-   
   const dispatch = useDispatch();
-
+  // Ref để kiểm tra xem sự kiện đã được đăng ký chưa
+  const messageListenerRef = useRef(false);
   const handleOpenReplyModel = () => setOpenReplyModal(true);
   const handleCloseReplyModal = () => setOpenReplyModal(false);
   const open = Boolean(anchorEl);
@@ -49,17 +56,35 @@ const [timeAgo, setTimeAgo] = useState(
 
   const handleLikeTweet = () => {
     dispatch(likePost(item?.id));
+    console.log("item", item)
   };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeAgo(formatTimeAgo(item.createdAt));
+    }, 60000); // Cập nhật mỗi phút
+    return () => clearInterval(interval); // Dọn dẹp interval khi component unmount
+  }, [item.createdAt]);
 
- useEffect(() => {
-   if (item?.createdAt) {
-     const interval = setInterval(() => {
-       setTimeAgo(formatTimeAgo(item.createdAt));
-     }, 60000); // Cập nhật mỗi phút
-
-     return () => clearInterval(interval);
-   }
- }, [item?.createdAt]);
+  // useEffect(() => {
+  //   if (wsConnection && auth?.user && !messageListenerRef.current) {
+  //     wsConnection.onmessage = (message) => {
+  //       const parsedMessage = JSON.parse(message.data);
+  //       if (parsedMessage.action === "LIKE_POST") {
+  //         console.log(
+  //           "Received like update for post: ",
+  //           parsedMessage.data.postId
+  //         );
+  //         // Cập nhật trạng thái like
+  //         dispatch(
+  //           updatePostLikes(
+  //             parsedMessage.data.postId,
+  //             parsedMessage.data.totalLikes
+  //           )
+  //         );
+  //       }
+  //     };
+  //   }
+  // });
   return (
     <React.Fragment>
       {/* <div className="flex items-center font-semibold text-gray-700 py-2">
