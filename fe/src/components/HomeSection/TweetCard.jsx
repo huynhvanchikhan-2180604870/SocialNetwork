@@ -52,6 +52,7 @@ const TweetCard = ({ item }) => {
 
   const handleCreateRetweet = () => {
     dispatch(createRepost(item?.id));
+     console.log("item", item);
   };
 
   const handleLikeTweet = () => {
@@ -65,26 +66,6 @@ const TweetCard = ({ item }) => {
     return () => clearInterval(interval); // Dọn dẹp interval khi component unmount
   }, [item.createdAt]);
 
-  // useEffect(() => {
-  //   if (wsConnection && auth?.user && !messageListenerRef.current) {
-  //     wsConnection.onmessage = (message) => {
-  //       const parsedMessage = JSON.parse(message.data);
-  //       if (parsedMessage.action === "LIKE_POST") {
-  //         console.log(
-  //           "Received like update for post: ",
-  //           parsedMessage.data.postId
-  //         );
-  //         // Cập nhật trạng thái like
-  //         dispatch(
-  //           updatePostLikes(
-  //             parsedMessage.data.postId,
-  //             parsedMessage.data.totalLikes
-  //           )
-  //         );
-  //       }
-  //     };
-  //   }
-  // });
   return (
     <React.Fragment>
       {/* <div className="flex items-center font-semibold text-gray-700 py-2">

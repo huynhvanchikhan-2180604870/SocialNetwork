@@ -6,7 +6,7 @@ import Authentication from "./components/Authentication/Authentication";
 import HomePage from "./components/HomePage/HomePage";
 import { connectWebSocket } from "./config/WebSocketService";
 import { getUserProfile } from "./store/Auth/Action";
-import { addNewLike, addNewPost, addNewReply } from "./store/Post/Action";
+import { addNewLike, addNewPost, addNewReply, addNewRepost } from "./store/Post/Action";
 import { WebSocketContext } from "./config/WebSocketContext";
 function App() {
   const jwt = localStorage.getItem("jwt");
@@ -44,7 +44,11 @@ function App() {
             }
           });
 
-
+          // Trong useEffect thiết lập WebSocket
+          stompClient.subscribe("/topic/reposts", (message) => {
+            const postDto = JSON.parse(message.body);
+            dispatch(addNewRepost(postDto));
+          });
           stompClient.subscribe("/topic/replies", (message) => {
             const replyBody = JSON.parse(message.body);
             dispatch(addNewReply(replyBody));

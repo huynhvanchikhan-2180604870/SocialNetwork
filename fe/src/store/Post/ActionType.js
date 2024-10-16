@@ -94,4 +94,5 @@ export const ADD_NEW_POST = "ADD_NEW_POST";
 export const ADD_NEW_REPLY = "ADD_NEW_REPLY";
 export const ADD_NEW_LIKE = "ADD_NEW_LIKE";
 export const UPDATE_POST_LIKES = "UPDATE_POST_LIKES";
-
+// Action Types
+export const ADD_NEW_REPOST = "ADD_NEW_REPOST";

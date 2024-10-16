@@ -189,6 +189,7 @@ import {
   ADD_NEW_LIKE,
   ADD_NEW_POST,
   ADD_NEW_REPLY,
+  ADD_NEW_REPOST,
   FIND_POST_BY_ID_FAILURE,
   FIND_POST_BY_ID_REQUEST,
   FIND_POST_BY_ID_SUCCESS,
@@ -331,20 +332,6 @@ export const postReducer = (state = initialState, action) => {
         }),
       };
 
-    // case LIKE_POST_SUCCESS:
-    //   return {
-    //     ...state,
-    //     posts: state.posts.map((post) =>
-    //       post.id === action.payload.postId
-    //         ? {
-    //             ...post,
-    //             likes: action.payload.likes,
-    //             totalLikes: action.payload.totalLikes,
-    //           }
-    //         : post
-    //     ),
-    //   };
-
     case USER_LIKE_POST_SUCCESS:
       return {
         ...state,
@@ -361,12 +348,28 @@ export const postReducer = (state = initialState, action) => {
         posts: state.posts.filter((post) => post.id !== action.payload),
       };
 
+    // case REPOST_SUCCESS:
+    //   return {
+    //     ...state,
+    //     loading: false,
+    //     error: null,
+    //     reposts: [action.payload, ...state.reposts],
+    //   };
+
     case REPOST_SUCCESS:
       return {
         ...state,
-        loading: false,
-        error: null,
-        reposts: [action.payload, ...state.reposts],
+        posts: state.posts.map((post) => {
+          if (post.id === action.payload.postId) {
+            return {
+              ...post,
+              repost: action.payload.isRepost, // Update isRepost for current user
+              totalRepost: action.payload.totalRepost, // Update totalRepost
+            };
+          } else {
+            return post;
+          }
+        }),
       };
 
     case FIND_POST_BY_ID_SUCCESS:
@@ -381,10 +384,11 @@ export const postReducer = (state = initialState, action) => {
         ...state,
         posts: updatePostInState(
           state.posts,
-          action.payload.postId,
+          action.payload.post_id, // Use the correct field here
           (post) => ({
             ...post,
-            replies: [...post.replies, action.payload],
+            totalReplies: post.totalReplies + 1, // Increment the totalReplies
+            replyPost: [...post.replyPost, action.payload], // Add the new reply
           })
         ),
       };
@@ -399,6 +403,23 @@ export const postReducer = (state = initialState, action) => {
               // Bảo toàn giá trị isLiked hiện tại của người dùng
               isLiked: post.liked,
               totalLikes: action.payload.totalLikes, // Cập nhật totalLikes từ server
+            };
+          } else {
+            return post;
+          }
+        }),
+      };
+
+    case ADD_NEW_REPOST:
+      return {
+        ...state,
+        posts: state.posts.map((post) => {
+          if (post.id === action.payload.postId) {
+            return {
+              ...post,
+              // Bảo toàn giá trị isRepost hiện tại của người dùng
+              isRepost: post.repost,
+              totalRepost: action.payload.totalRepost, // Cập nhật totalRepost từ server
             };
           } else {
             return post;
