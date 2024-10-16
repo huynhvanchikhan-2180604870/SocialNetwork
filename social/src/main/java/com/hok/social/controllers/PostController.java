@@ -56,7 +56,7 @@ public class PostController {
         Post post = postService.rePost(post_id, user);
         PostDto postDto = PostDtoMapper.toPostDto(post, user);
         // Phát thông báo về repost qua WebSocket
-//        messagingTemplate.convertAndSend("/topic/messages", postDto);
+        messagingTemplate.convertAndSend("/topic/reposts", postDto);
         return new ResponseEntity<>(postDto, HttpStatus.OK);
     }
 

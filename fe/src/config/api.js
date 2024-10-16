@@ -1,6 +1,7 @@
 import axios from "axios";
-
-export const API_BASE_URL = "http://192.168.1.5:8080";
+import { IP_PUBLIC } from "./ipconfig";
+// const ip = `http://${IP_PUBLIC}:8080`
+export const API_BASE_URL = `http://${IP_PUBLIC}:8080`;
 
 export const api = axios.create({
     baseURL:API_BASE_URL,
@@ -9,3 +10,5 @@ export const api = axios.create({
         'Content-Type': 'application/json'
     }
 })
+
+

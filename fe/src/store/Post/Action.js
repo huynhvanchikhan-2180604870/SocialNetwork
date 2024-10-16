@@ -159,6 +159,7 @@ import {
   GET_USER_REPOST_SUCCESS,
   GET_USER_REPOST_FAILURE,
   UPDATE_POST_LIKES,
+  ADD_NEW_REPOST,
 } from "./ActionType";
 
 // Helper function to handle API request
@@ -255,12 +256,31 @@ export const createPostReply = (postData) => async (dispatch) => {
 };
 
 // Repost a post
-export const createRepost = (postID) => async (dispatch) => {
-  await handleApiRequest(dispatch, null, REPOST_SUCCESS, REPOST_FAILURE, () =>
-    api.put(`/api/posts/${postID}/repost`)
-  );
-};
+// export const createRepost = (postID) => async (dispatch) => {
+//   await handleApiRequest(dispatch, null, REPOST_SUCCESS, REPOST_FAILURE, () =>
+//     api.put(`/api/posts/${postID}/repost`)
+//   );
+// };
 
+export const createRepost = (postID) => async (dispatch) => {
+  try {
+    const response = await api.put(`/api/posts/${postID}/repost`);
+    dispatch({
+      type: REPOST_SUCCESS,
+      payload: {
+        postId: response.data.id, // Adjust based on your API response
+        isRepost: response.data.repost, // Current user has reposted
+        totalRepost: response.data.totalRepost,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    dispatch({
+      type: REPOST_FAILURE,
+      payload: error.message,
+    });
+  }
+};
 // // Like a post
 // export const likePost = (postID) => async (dispatch) => {
 //   await handleApiRequest(
@@ -305,12 +325,24 @@ export const deletePost = (postID) => async (dispatch) => {
 
 // WebSocket actions
 export const addNewPost = (post) => ({ type: ADD_NEW_POST, payload: post });
-export const addNewReply = (reply) => ({ type: ADD_NEW_REPLY, payload: reply });
+export const addNewReply = (postDto) => ({
+  type: ADD_NEW_REPLY,
+  payload: postDto,
+});
 export const addNewLike = (likeDto) => ({
   type: ADD_NEW_LIKE,
   payload: {
     postId: likeDto.post.id,
     totalLikes: likeDto.post.totalLikes,
+  },
+});
+
+// Action Creators
+export const addNewRepost = (postDto) => ({
+  type: ADD_NEW_REPOST,
+  payload: {
+    postId: postDto.id,
+    totalRepost: postDto.totalRepost,
   },
 });
 export const updatePostLikes = (postId, totalLikes) => {
@@ -322,3 +354,7 @@ export const updatePostLikes = (postId, totalLikes) => {
     },
   };
 };
+
+
+
+
