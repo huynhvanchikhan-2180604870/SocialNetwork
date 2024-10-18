@@ -1,32 +1,33 @@
 package com.hok.social.config;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.*;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+
+import javax.crypto.SecretKey;
+
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.crypto.SecretKey;
-import java.io.IOException;
-import java.util.List;
-
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class JwtTokenValidator extends OncePerRequestFilter {
+
     @Override
-    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)throws IOException, ServletException {
+    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         String token = request.getHeader(JwtConstant.JWT_HEADER);
 
-        if(token != null) {
+        if (token != null) {
             token = token.substring(7);
 
             try {
@@ -40,10 +41,9 @@ public class JwtTokenValidator extends OncePerRequestFilter {
                 Authentication authentication = new UsernamePasswordAuthenticationToken(email, null, auths);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            }catch (Exception e) {
+            } catch (Exception e) {
                 throw new BadCredentialsException("Invalid JWT token");
             }
-
 
         }
         filterChain.doFilter(request, response);

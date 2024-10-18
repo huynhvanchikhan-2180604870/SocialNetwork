@@ -1,1 +1,1 @@
-export const IP_PUBLIC = "192.168.1.5";
+export const IP_PUBLIC = "hockitsystems.id.vn";
