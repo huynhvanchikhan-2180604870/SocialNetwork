@@ -22,12 +22,12 @@ const TweetCard = ({ item }) => {
   const [openReplyModal, setOpenReplyModal] = useState(false);
   const { auth } = useSelector((state) => state);
   const post = useSelector((state) =>
-    state.post.posts.find((p) => p.id === item.id)
+    state.post.posts.find((p) => p.id === item?.id)
   );
   const [timeAgo, setTimeAgo] = useState(
-    item?.createdAt ? formatTimeAgo(item.createdAt) : ""
+    item?.createdAt ? formatTimeAgo(item?.createdAt) : ""
   );
-
+  console.log(item)
   const dispatch = useDispatch();
   // Ref để kiểm tra xem sự kiện đã được đăng ký chưa
   const messageListenerRef = useRef(false);
@@ -64,7 +64,7 @@ const TweetCard = ({ item }) => {
       setTimeAgo(formatTimeAgo(item.createdAt));
     }, 60000); // Cập nhật mỗi phút
     return () => clearInterval(interval); // Dọn dẹp interval khi component unmount
-  }, [item.createdAt]);
+  }, [item?.createdAt]);
 
   return (
     <React.Fragment>
